@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Akka!</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #fff3e0, #ffecb3);
+            min-height: 100vh;
+            color: #5d4037;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: none;
+            /* Hidden until password unlocked */
+            justify-content: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .nav-item a {
+            text-decoration: none;
+            color: #5d4037;
+            font-weight: 600;
+            font-size: 16px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .nav-item a:hover,
+        .nav-item a.active {
+            background: #ffcc80;
+            color: white;
+        }
+
+        .section-title {
+            text-align: center !important;
+            display: block !important;
+            width: 100% !important;
+        }
+
+        /* Password Modal */
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+
+        .password-content {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            animation: bounceIn 1s forwards;
+        }
+
+        .password-content h2 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 36px;
+            margin-bottom: 30px;
+            color: #d84315;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ffe082;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .password-input:focus {
+            border-color: #f57f17;
+        }
+
+        .submit-btn {
+            background: #fbc02d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #f9a825;
+            transform: scale(1.05);
+        }
+
+        /* Interactive Buttons */
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            position: relative;
+            /* For floating message */
+        }
+
+        .yes-btn,
+        .no-btn {
+            padding: 16px 40px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            font-size: 22px;
+            font-weight: 800;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+
+        .yes-btn {
+            background: linear-gradient(135deg, #43a047, #66bb6a);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .no-btn {
+            background: linear-gradient(135deg, #e53935, #ef5350);
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .yes-btn:hover {
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 15px 30px rgba(67, 160, 71, 0.4);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .no-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(229, 57, 53, 0.4);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Floating Message Box */
+        #messageBox {
+            position: absolute;
+            top: -60px;
+            /* Float above buttons */
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            font-weight: bold;
+            color: #d84315;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            pointer-events: none;
+        }
+
+        #messageBox.show {
+            opacity: 1;
+            top: -70px;
+            /* Slight move up */
+        }
+
+        /* Animations */
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px) rotate(-5deg);
+            }
+
+            75% {
+                transform: translateX(5px) rotate(5deg);
+            }
+        }
+
+        @keyframes pulse-glow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(76, 175, 80, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+            }
+        }
+
+        /* Confetti Fall */
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg);
+            }
+        }
+
+        /* content structure */
+        .main-content {
+            display: none;
+            /* Hidden until unlock */
+            padding-top: 60px;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+
+        section {
+            padding: 60px 20px;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 42px;
+            color: #ef6c00;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+
+        /* Letter Section */
+        .letter-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            font-size: 18px;
+            line-height: 1.8;
+            border: 1px solid #ffe0b2;
+            position: relative;
+            overflow: hidden;
+            /* Added to contain pseudo-element */
+        }
+
+        .letter-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('collage.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.4;
+            /* Adjusted transparency */
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .letter-card::before {
+            content: '❝';
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 80px;
+            color: rgba(255, 224, 178, 0.4);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .letter-card p {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Music Section */
+        .music-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+
+        .music-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .music-icon {
+            width: 60px;
+            height: 60px;
+            background: #fff3e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #ff9800;
+        }
+
+        /* Notes Grid */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: #fff8e1;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid #ffca28;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Gallery Grid */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.35s, box-shadow 0.35s;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+        }
+
+        .gallery-item .photo-wrap {
+            height: 240px;
+            overflow: hidden;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.07);
+        }
+
+        .gallery-caption {
+            padding: 14px 16px;
+            background: white;
+        }
+
+        .gallery-caption .caption-emoji {
+            font-size: 22px;
+        }
+
+        .gallery-caption .caption-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #ef6c00;
+            margin: 4px 0 2px;
+        }
+
+        .gallery-caption .caption-desc {
+            font-size: 13px;
+            color: #795548;
+            line-height: 1.5;
+        }
+
+        .gallery-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            font-size: 13px;
+            color: #bf360c;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* Story Modal */
+        .story-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .story-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            overflow: hidden;
+            transform: scale(0.85);
+            transition: transform 0.3s;
+        }
+
+        .story-content.show {
+            transform: scale(1);
+        }
+
+        .story-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+        }
+
+        .story-body {
+            padding: 20px 25px 25px;
+        }
+
+        .story-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #5d4037;
+        }
+
+        .close-story {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #aaa;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .close-story:hover {
+            color: #e65100;
+        }
+
+        /* Memory Music Bar */
+        #memoryMusicBar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.93);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            z-index: 4000;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            pointer-events: none;
+        }
+
+        #memoryMusicBar.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        #memoryMusicBar .music-note {
+            font-size: 20px;
+            display: inline-block;
+            animation: noteBounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes noteBounce {
+
+            0%,
+            100% {
+                transform: rotate(-10deg) scale(1);
+            }
+
+            50% {
+                transform: rotate(10deg) scale(1.2);
+            }
+        }
+
+        #memoryMusicBar .music-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e65100;
+        }
+
+        #toggleMusicBtn {
+            background: #ffcc80;
+            border: none;
+            border-radius: 20px;
+            padding: 5px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            color: #bf360c;
+            transition: background 0.2s;
+        }
+
+        #toggleMusicBtn:hover {
+            background: #ffa726;
+        }
+
+        /* Floating Elements */
+        .floating-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float-up 10s infinite ease-in;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Akka Thambi Photo Dump */
+        .at-photo {
+            border-radius: 14px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            background: #fff3e0;
+        }
+
+        .at-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+        }
+
+        .at-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s;
+        }
+
+        .at-photo:hover img {
+            transform: scale(1.08);
+        }
+
+        /* Video Grid Styles */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .video-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .video-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .music-card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+            opacity: 0.9;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .music-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+        }
+
+        .video-card video {
+            width: 100%;
+            height: 320px;
+            /* Gives nice height */
+            object-fit: contain;
+            /* Prevents zooming/blurring and shows original format */
+            background: #000;
+            border-radius: 18px 18px 0 0;
+        }
+
+        .video-info {
+            padding: 15px;
+            text-align: center;
+            background: white;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-title {
+            font-weight: 700;
+            color: #ef6c00;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Password Modal (Now Interactive Question) -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-content">
+            <h2 id="modalQuestion">Am I the best brother? 🐣</h2>
+            <div class="buttons-container" id="buttonsContainer">
+                <p id="messageBox"></p> <!-- Moved inside container for relative positioning -->
+                <button class="yes-btn" id="btnYes">YES!</button>
+                <button class="no-btn" id="btnNo">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story Modal -->
+    <div class="story-modal" id="storyModal">
+        <div class="story-content" id="storyContent">
+            <span class="close-story" id="closeStory">&times;</span>
+            <img src="" alt="Memory" class="story-image" id="modalImage">
+            <div class="story-body">
+                <p class="story-text" id="modalText"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <ul class="nav-links">
+            <li class="nav-item"><a href="#intro">Home</a></li>
+            <li class="nav-item"><a href="#letter">Letter</a></li>
+            <li class="nav-item"><a href="#music">Music</a></li>
+            <li class="nav-item"><a href="#remainders">remainders for you</a></li>
+            <li class="nav-item"><a href="#akka-thambi">Akka Thambi 💛</a></li>
+            <li class="nav-item"><a href="#memories">Memories 🎞️</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Scrolling Content -->
+    <div class="main-content" id="mainContent">
+
+        <!-- Intro Section -->
+        <section id="intro"
+            style="min-height: 80vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+            <h1
+                style="font-family: 'Dancing Script', cursive; font-size: 60px; color: #e65100; margin-bottom: 20px; text-align: center;">
+                ✨ Happy Birthday Dakshinya! ✨</h1>
+            <p style="font-size: 20px; max-width: 600px;">to The most beautiful soul. The best sister. My best friend.
+            </p>
+            <div style="margin-top: 40px; font-size: 40px; animation: bounceIn 2s infinite;">👇</div>
+        </section>
+
+        <!-- Letter Section -->
+        <section id="letter">
+            <h2 class="section-title">💌 My Dearest AKKA 💌</h2>
+            <div class="letter-card">
+                <p><strong>Happy Birthday Akka! 💛</strong></p>
+                <p>I don’t even know where to start, Akka… 🥹 I’m just so grateful to have you in my life. Thank you for
+                    “adopting” me as your brother. I’m really happy, thankful, and endlessly grateful for you, more than
+                    I can ever put into words 🤍✨</p>
+                <br>
+                <p>Today feels brighter, like the world itself knows it’s your day ☀️💛 You deserve every bit of
+                    happiness, success, peace, and every beautiful thing this universe can offer 🌸✨ You’re not just
+                    special, you’re rare. The kind of person this world doesn’t get often… and somehow, I got lucky
+                    enough to call you my sister 🥹 I’ll always be grateful for that, for adopting me as your thambi
+                    🤍😂😂</p>
+                <br>
+                <p>Thank you for being my safe place 🤍 On days when I call you feeling low, confused, or completely
+                    off… we somehow end up laughing like idiots 😂 You turn my worst moods into the best memories
+                    without even trying. And I’ll never stop being thankful for that 🫶.</p>
+                <br>
+                <p>You’ve changed the way I think in so many situations. When my mind was stuck in one direction, you
+                    showed me another perspective ✨ The way you handle things, the confidence you carry, the strength
+                    you show, it’s powerful 💪🤍 You’re honestly one of the strongest and most confident women I’ve ever
+                    seen.</p>
+                <br>
+                <p>And I need you to always remember something… if you ever feel ignored, unimportant, or even slightly
+                    worthless, you know exactly where your place is. Thambi is here 🤍 Always. No conditions. No
+                    judgment. Just us 🫂.</p>
+                <br>
+                <p>Please take care of yourself. Protect your happiness. Choose peace 🕊️ You deserve a life that feels
+                    light, not heavy 🌸✨.</p>
+                <br>
+                <p>Happy Birthday once again, Akka 🎂 You’re truly the best 🫂. And I’ll always be grateful that I get
+                    to
+                    call you my sister 🤝✨💛.</p>
+                <br>
+                <p style="text-align: right; font-weight: bold; font-family: 'Dancing Script'; font-size: 24px;">-
+                    Thambiii</p>
+            </div>
+        </section>
+
+        <!-- Music Section -->
+        <section id="music">
+            <h2 class="section-title">🎵 Our Vibe 🎵</h2>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- Rettai Kathire -->
+                <div class="music-card"
+                    style="padding: 20px; background: #fff8e1; border: 1px solid #ffe0b2; border-radius: 12px; text-align: center;">
+                    <div style="font-weight: bold; color: #e65100; margin-bottom: 15px; font-size: 18px;">Rettai Kathire
+                        🎵</div>
+                    <audio id="rettaiAudio" controls style="width: 100%; border-radius: 8px;">
+                        <source src="rettai kadhire.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+                <!-- Paatu Onnu  -->
+                <div class="music-card"
+                    style="padding: 20px; background: #fff8e1; border: 1px solid #ffe0b2; border-radius: 12px; text-align: center;">
+                    <div style="font-weight: bold; color: #e65100; margin-bottom: 15px; font-size: 18px;">Pattu Onnu
+                        Kattu 🎵</div>
+                    <audio id="pattuAudio" controls style="width: 100%; border-radius: 8px;">
+                        <source src="sivanum sakthiyum.mp3" type="audio/mpeg">
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+            </div>
+        </section>
+
+        <!-- Notes Section -->
+        <section id="notes">
+            <h2 class="section-title">💡 Reminders for You 💡</h2>
+            <div class="notes-grid">
+                <div class="note-card">
+                    <p>nalla sapdu, nalla thoongu, sandhosama iru . The world needs you strong. 💛</p>
+                </div>
+                <div class="note-card">
+                    <p>Do everything with confidence. You were never made to doubt yourself. ✨</p>
+                </div>
+                <div class="note-card">
+                    <p>Stay motivated. You’re built for bigger things than you even realize. 🚀</p>
+                </div>
+                <div class="note-card">
+                    <p>Thambi always got your back. You’re never alone. 🛡️</p>
+                </div>
+                <div class="note-card">
+                    <p>Walk like you know your worth because you do. 👑</p>
+                </div>
+                <div class="note-card">
+                    <p>Protect your peace. Choose progress. Keep shining. 🌟</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+    </section>
+
+    <!-- Akka Thambi Section -->
+    <section id="akka-thambi">
+        <h2 class="section-title">� Akka Thambi 💛</h2>
+        <p style="text-align:center; color:#795548; margin-top:-15px; margin-bottom:25px; font-size:15px;">
+            Us, always. Every moment, every chaos, every laugh. 🤝
+        </p>
+        <div style="
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 12px;
+            " id="akkaThambiGrid">
+
+            <div class="at-photo"><img src="collage.jpg" alt="Collage"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="coorg selfie.jpg" alt="Coorg Selfie"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="dakshinya horse.jpg" alt="Horse Day"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="dance practice weird photos.jpg" alt="Dance Practice"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="duck holding duck.jpg" alt="Duck Duck"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="force photo.jpg" alt="Force Photo"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="haircut kavin .jpg" alt="Haircut Kavin"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="haircut.jpg" alt="Haircut"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="kolinja parai photo .jpg" alt="Kolinja Parai"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="marudamalai pic 1 .jpg" alt="Marudamalai"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="same same dress.jpg" alt="Same Dress"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="sankara clg .jpg" alt="Sankara College"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="kolinjaparai fight .jpg" alt="akka adikadhinga"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="thumbs up glasses.jpg" alt="Thumbs Up Glasses"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="thumbs up.jpg" alt="Thumbs Up"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="weird face 3 .jpg" alt="Weird Face 3"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="weird face 4 .jpg" alt="Weird Face 4"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="weird face 5.jpg" alt="Weird Face 5"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="weird faces 2 .jpg" alt="Weird Faces 2"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="pongal ppc.jpg" alt="Pongal PPC"
+                    onerror="this.parentElement.style.display='none'"></div>
+            <div class="at-photo"><img src="zudio.jpg" alt="Zudio" onerror="this.parentElement.style.display='none'">
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Clips Section -->
+    <section id="memories">
+        <h2 class="section-title">🎞️ Clips & Chaos 🎞️</h2>
+        <p style="text-align:center; color:#795548; margin-top:-15px; margin-bottom:35px; font-size:15px;">
+            Some random moments that deserve their own screen 🍿
+        </p>
+        <div class="video-grid">
+            <!-- Video 1 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="thumbs up dance.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">Thumbs Up 👍</div>
+                </div>
+            </div>
+            <!-- Video 2 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="shopping final.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">Shopping ahhh?? 🛍️✨</div>
+                </div>
+            </div>
+            <!-- Video 3 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="rider.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">The Rider 🏍️</div>
+                </div>
+            </div>
+            <!-- Video 4 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="puratasi.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">Puratasi Vibe 🕊️</div>
+                </div>
+            </div>
+            <!-- Video 5 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="mendal dance.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">Mental Dance 🕺</div>
+                </div>
+            </div>
+            <!-- Video 6 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="mental dance 2.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">edheyyyy 💃</div>
+                </div>
+            </div>
+            <!-- Video 7 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="mariyadhai.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">Mariyadhai 🫡</div>
+                </div>
+            </div>
+            <!-- Video 8 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="hi guysss.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">Hi Guysss! 👋</div>
+                </div>
+            </div>
+            <!-- Video 9 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="hi guys welcom to daks utube channel.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">welcome to daks youtube channel 😂</div>
+                </div>
+            </div>
+            <!-- Video 10 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="drug addict .mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">Drug Addict? 😂💊</div>
+                </div>
+            </div>
+            <!-- Video 11 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="bottle opening.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">ellam experiance 🍾</div>
+                </div>
+            </div>
+            <!-- Video 12 -->
+            <div class="video-card">
+                <video controls>
+                    <source src="2nd year last day.mp4" type="video/mp4">
+                </video>
+                <div class="video-info">
+                    <div class="video-title">2nd Year Last Day 🎓</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final Edit Section -->
+    <section id="final-edit" style="text-align:center; padding: 60px 20px 80px;">
+
+
+        <h2 class="section-title">🎬 One Last Thing… 🎬</h2>
+        <p
+            style="color:#795548; font-size:16px; margin-bottom:35px; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.7;">
+            I made something for you akka. Something you'll probably be surprised by.<br>
+            <strong style="color:#e65100;">Are you ready?</strong>
+        </p>
+        <button id="seeEditBtn" onclick="openEditVideo()" style="
+                background: linear-gradient(135deg, #ff9800, #e65100);
+                color: white;
+                border: none;
+                border-radius: 50px;
+                padding: 18px 45px;
+                font-size: 20px;
+                font-weight: 800;
+                cursor: pointer;
+                box-shadow: 0 0 30px rgba(255, 152, 0, 0.5), 0 6px 20px rgba(0,0,0,0.2);
+                animation: pulse-glow 2s infinite;
+                font-family: 'Montserrat', sans-serif;
+                letter-spacing: 1px;
+                transition: transform 0.2s;
+            " onmouseover="this.style.transform='scale(1.07)'" onmouseout="this.style.transform='scale(1)'">
+            ▶ akka ku oru vedio 💛
+        </button>
+    </section>
+
+    <!-- Final Message Section -->
+    <section id="final-message"
+        style="text-align: center; padding: 100px 20px; background: linear-gradient(to bottom, #fff8e1, #ffffff);">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <h2 class="section-title" style="font-family: 'Dancing Script', cursive; font-size: 40px; color: #e65100;">✨
+                A Final Note ✨</h2>
+            <div style="font-size: 22px; color: #795548; line-height: 1.8; font-style: italic; margin-top: 30px;">
+                <p> once again,
+
+                    Happiest Birthday to my sweetest, lovely Akka 🤍✨
+
+                    I pray this year brings you the success you’ve been working so hard for, the peace your heart
+                    deserves, and the happiness that stays with you every single day 🌸💫
+
+                    After all the struggles you’ve faced, you still stand strong. That’s why you’re a queen 👑 Not just
+                    in words, but in the way you carry yourself.
+
+                    You deserve more. More happiness. More success.. More of this world 🌍✨
+
+                    And I truly believe the best is still coming for you 💛."</p>
+                <p style="margin-top: 20px; font-weight: bold; color: #e65100;">"Happiest Birthday to my Akka, like the
+                    very happiest! always
+                    praying for your success. thambi got your back 💛✨"</p>
+            </div>
+            <div style="margin-top: 50px; font-size: 30px;">🤝✨💛✨🤝</div>
+        </div>
+    </section>
+
+    </div>
+
+    <!-- Video Overlay -->
+    <div id="videoOverlay" onclick="handleOverlayClick(event)" style="
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.92);
+        z-index: 9000;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    ">
+        <button onclick="closeEditVideo()" style="
+            position: absolute;
+            top: 18px; right: 22px;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 48px; height: 48px;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+            transition: background 0.2s;
+            z-index: 9001;
+        " onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.15)'">✕</button>
+        <video id="akkEditVideo" controls style="
+            max-width: 92vw;
+            max-height: 88vh;
+            border-radius: 16px;
+            box-shadow: 0 0 60px rgba(255,152,0,0.3);
+        ">
+            <source src="akka edit.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Memory Music Bar (floats in when gallery is scrolled to) -->
+    <div id="memoryMusicBar">
+        <span class="music-note">🎵</span>
+        <span class="music-label">Birthday Vibe ✨</span>
+        <button id="toggleMusicBtn" onclick="toggleMemoryMusic()">⏸ Pause</button>
+    </div>
+
+    <!-- Background audio -->
+    <audio id="memoriesAudio" loop>
+        <source src="song bg.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="floating-bg" id="floatingBg"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordModal = document.getElementById('passwordModal');
+            const nav = document.getElementById('navbar');
+            const mainContent = document.getElementById('mainContent');
+
+            // Interactive Unlock Elements
+            const btnYes = document.getElementById('btnYes');
+            const btnNo = document.getElementById('btnNo');
+            const messageBox = document.getElementById('messageBox');
+            let noClickCount = 0;
+            const noMessages = [
+                "Are you sure? 🤨",
+                "Think again! 🤔",
+                "Don't lie to yourself! 🤥",
+                "Really? Still no? 😢",
+                "Okay, last chance! ⚠️"
+            ];
+
+            // No Button Logic
+            btnNo.addEventListener('click', () => {
+                if (noClickCount >= 2) return; // Unclickable after 2 clicks
+
+                noClickCount++;
+
+                // Show message with floating animation
+                messageBox.classList.add('show');
+                if (noClickCount <= noMessages.length) {
+                    messageBox.innerText = noMessages[noClickCount - 1];
+                } else {
+                    messageBox.innerText = "Try catching me now! 🏃‍♂️💨";
+                }
+
+                // Shake animation for No button
+                btnNo.style.animation = 'shake 0.3s ease';
+                setTimeout(() => btnNo.style.animation = '', 300);
+
+                // Evasion Logic after 2 clicks
+                if (noClickCount >= 2) {
+                    btnNo.style.position = 'fixed';
+                    btnNo.style.zIndex = '9999';
+                    btnNo.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+                    const moveButton = () => {
+                        const maxX = window.innerWidth - btnNo.clientWidth;
+                        const maxY = window.innerHeight - btnNo.clientHeight;
+
+                        const randomX = Math.random() * maxX;
+                        const randomY = Math.random() * maxY;
+
+                        btnNo.style.left = `${randomX}px`;
+                        btnNo.style.top = `${randomY}px`;
+                    };
+
+                    // Activate Evasion on mouseover
+                    btnNo.onmouseover = moveButton;
+                    moveButton(); // Initial move
+                }
+                // Shrink No button normally if not evaporating
+                const currentScale = 1 - (noClickCount * 0.15);
+                if (currentScale > 0.3) { // Stop shrinking too much when evading
+                    btnNo.style.transform = `scale(${currentScale})`;
+                }
+
+                // Grow Yes button with Pulse
+                const currentYesScale = 1 + (noClickCount * 0.2);
+                btnYes.style.transform = `scale(${currentYesScale})`;
+                btnYes.style.animation = 'pulse-glow 1s infinite';
+            });
+
+            // Yes Button Logic (Confetti Shower + Unlock)
+            // Yes Button Logic (Confetti Shower + Unlock)
+            btnYes.addEventListener('click', () => {
+                messageBox.innerText = "YAYYY! 🎉💛";
+                messageBox.classList.add('show');
+
+                // Unlock immediately
+                passwordModal.style.opacity = '0';
+                setTimeout(() => {
+                    passwordModal.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    nav.style.display = 'flex';
+                    window.scrollTo({ top: 0, behavior: 'instant' }); // Jump instantly to top
+                    initAnimations();
+                    startConfettiShower(); // Start confetti AFTER content is visible
+
+                    // 🎵 Start background music immediately from beginning
+                    const audio = document.getElementById('memoriesAudio');
+                    if (audio) {
+                        audio.currentTime = 0;
+                        fadeInMusic();
+                    }
+                }, 500);
+            });
+
+            function startConfettiShower() {
+                const colors = ['#ffc107', '#ff9800', '#ff5722', '#4caf50', '#2196f3', '#e91e63'];
+
+                // Function to create one burst
+                function createBurst() {
+                    for (let i = 0; i < 50; i++) {
+                        const confetti = document.createElement('div');
+                        confetti.style.position = 'fixed';
+                        confetti.style.left = Math.random() * 100 + 'vw';
+                        confetti.style.top = '-10px';
+                        confetti.style.width = Math.random() * 10 + 5 + 'px';
+                        confetti.style.height = Math.random() * 5 + 5 + 'px';
+                        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.zIndex = '3000';
+                        confetti.style.animation = `fall ${Math.random() * 2 + 3}s linear forwards`;
+
+                        document.body.appendChild(confetti);
+
+                        // Cleanup
+                        setTimeout(() => confetti.remove(), 5000);
+                    }
+                }
+
+                // Initial massive burst (5x normal)
+                for (let j = 0; j < 5; j++) createBurst();
+
+                // Continuous showers every 300ms for 4 seconds
+                let showerInterval = setInterval(createBurst, 300);
+                setTimeout(() => clearInterval(showerInterval), 4000);
+            }
+
+
+            // Story Modal Logic
+            const storyModal = document.getElementById('storyModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalText = document.getElementById('modalText');
+            const closeStory = document.getElementById('closeStory');
+            const storyContent = document.getElementById('storyContent');
+
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const story = item.getAttribute('data-story');
+                    // Use placeholder or actual image source
+                    const imgSource = item.querySelector('img') ? item.querySelector('img').src : 'https://via.placeholder.com/600x400/fff3e0/e65100?text=Your+Photo+Here';
+
+                    modalText.innerText = story || "A beautiful memory.";
+                    modalImage.src = imgSource;
+
+                    storyModal.style.display = 'flex';
+                    // Small delay for fade in transition
+                    setTimeout(() => {
+                        storyModal.style.opacity = '1';
+                        storyContent.classList.add('show');
+                    }, 10);
+                });
+            });
+
+            closeStory.addEventListener('click', () => {
+                storyModal.style.opacity = '0';
+                storyContent.classList.remove('show');
+                setTimeout(() => {
+                    storyModal.style.display = 'none';
+                }, 300);
+            });
+
+            // Close modal if clicked outside
+            storyModal.addEventListener('click', (e) => {
+                if (e.target === storyModal) {
+                    closeStory.click();
+                }
+            });
+
+            // Scroll Animation Observer + Gallery Music Trigger
+            function initAnimations() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('section').forEach(section => {
+                    observer.observe(section);
+                });
+
+                document.querySelectorAll('section').forEach(section => {
+                    observer.observe(section);
+                });
+
+                // 🎵 Music Bar Visibility Observer
+                const memoriesSection = document.getElementById('akka-thambi');
+                const musicBar = document.getElementById('memoryMusicBar');
+
+                const barObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            musicBar.classList.add('visible');
+                        }
+                    });
+                }, { threshold: 0.2 });
+
+                barObserver.observe(memoriesSection);
+
+                // 🎵 Set local music volumes to be calmer
+                const rettaiAudio = document.getElementById('rettaiAudio');
+                const pattuAudio = document.getElementById('pattuAudio');
+                if (rettaiAudio) {
+                    rettaiAudio.volume = 0.4;
+                    rettaiAudio.addEventListener('play', () => {
+                        fadeOutMusic();
+                        if (pattuAudio) pattuAudio.pause(); // Exclusive playback
+                    });
+                    rettaiAudio.addEventListener('pause', () => fadeInMusic());
+                    rettaiAudio.addEventListener('ended', () => fadeInMusic());
+                }
+                if (pattuAudio) {
+                    pattuAudio.volume = 0.4;
+                    pattuAudio.addEventListener('play', () => {
+                        fadeOutMusic();
+                        if (rettaiAudio) rettaiAudio.pause(); // Exclusive playback
+                    });
+                    pattuAudio.addEventListener('pause', () => fadeInMusic());
+                    pattuAudio.addEventListener('ended', () => fadeInMusic());
+                }
+
+                // 🎵 Set videos to subtle volume
+                document.querySelectorAll('video').forEach(video => {
+                    video.volume = 0.08; // Super subtle volume so BG music dominates
+                    video.addEventListener('play', () => {
+                        // Background music keeps playing
+                    });
+                });
+            }
+
+            // Function to fade out background music
+            window.fadeOutMusic = function () {
+                const audio = document.getElementById('memoriesAudio');
+                if (!audio || audio.paused) return;
+
+                let vol = audio.volume;
+                const fadeOut = setInterval(() => {
+                    vol = Math.max(vol - 0.02, 0);
+                    audio.volume = vol;
+                    if (vol <= 0) {
+                        audio.pause();
+                        clearInterval(fadeOut);
+                        const musicBtn = document.getElementById('toggleMusicBtn');
+                        if (musicBtn) musicBtn.textContent = '▶ Play';
+                    }
+                }, 50);
+            };
+
+            // Function to fade in background music
+            window.fadeInMusic = function () {
+                const audio = document.getElementById('memoriesAudio');
+                if (!audio) return;
+
+                audio.play();
+                let vol = 0;
+                audio.volume = 0;
+                const fadeIn = setInterval(() => {
+                    vol = Math.min(vol + 0.005, 0.25); // Calibration: 0.25 peak for stronger presence
+                    audio.volume = vol;
+                    if (vol >= 0.25) {
+                        clearInterval(fadeIn);
+                        const musicBtn = document.getElementById('toggleMusicBtn');
+                        if (musicBtn) musicBtn.textContent = '⏸ Pause';
+                    }
+                }, 80);
+            };
+
+            // Floating Bubbles
+            const bg = document.getElementById('floatingBg');
+            for (let i = 0; i < 30; i++) {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                b.style.left = Math.random() * 100 + '%';
+                b.style.width = Math.random() * 50 + 20 + 'px';
+                b.style.height = b.style.width;
+                b.style.animationDuration = Math.random() * 5 + 5 + 's';
+                b.style.animationDelay = Math.random() * 5 + 's';
+                bg.appendChild(b);
+            }
+        });
+
+        // Global toggle for music bar button
+        function toggleMemoryMusic() {
+            const audio = document.getElementById('memoriesAudio');
+            if (audio.paused) {
+                fadeInMusic();
+                window._musicPaused = false;
+            } else {
+                fadeOutMusic();
+                window._musicPaused = true;
+            }
+        }
+
+        function openEditVideo() {
+            const overlay = document.getElementById('videoOverlay');
+            const video = document.getElementById('akkEditVideo');
+
+            // 🎵 Specifically pause background music for final video
+            fadeOutMusic();
+
+            // Show overlay and play video
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.opacity = '1';
+                video.currentTime = 0;
+                video.volume = 0.2; // Calmer volume for final video
+                video.play();
+            }, 10);
+        }
+
+        function closeEditVideo() {
+            const overlay = document.getElementById('videoOverlay');
+            const video = document.getElementById('akkEditVideo');
+
+            video.pause();
+
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 400);
+
+            // 🎵 Resume background music after final video
+            fadeInMusic();
+        }
+
+        function handleOverlayClick(event) {
+            // Close if background is clicked, not the video itself
+            if (event.target.id === 'videoOverlay') {
+                closeEditVideo();
+            }
+        }
+    </script>
+</body>
+
+</html>
